@@ -6,6 +6,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 {
     public DbSet<CourseEntity> Courses { get; set; }
 
+    public DbSet<UserCoursesEntity> UserCourses { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -21,6 +23,9 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.Entity<CourseEntity>().OwnsOne(c => c.Prices);
         modelBuilder.Entity<CourseEntity>().OwnsMany(c => c.Authors);
         modelBuilder.Entity<CourseEntity>().OwnsOne(c => c.Content, content =>{ content.OwnsMany(c => c.ProgramDetails); });
-      
+
+        modelBuilder.Entity<UserCoursesEntity>().ToContainer("UserCourses");
+        modelBuilder.Entity<UserCoursesEntity>().HasPartitionKey(c => c.UserId);
+        modelBuilder.Entity<UserCoursesEntity>().HasNoKey();
     }
 }

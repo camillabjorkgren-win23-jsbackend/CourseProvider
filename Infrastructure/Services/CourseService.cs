@@ -1,7 +1,10 @@
 ﻿using Infrastructure.Data.Contexts;
+using Infrastructure.Data.Entities;
 using Infrastructure.Factories;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using System;
 
 namespace Infrastructure.Services;
 public class CourseService(IDbContextFactory<DataContext> contextFactory) : ICourseService
@@ -16,9 +19,11 @@ public class CourseService(IDbContextFactory<DataContext> contextFactory) : ICou
         context.Courses.Add(courseEntity);
         await context.SaveChangesAsync();
 
+        await context.DisposeAsync();
         return CourseFactory.CreateToModel(courseEntity);
 
     }
+
 
     public async Task<bool> DeleteCourseAsync(string id)
     {
@@ -36,12 +41,15 @@ public class CourseService(IDbContextFactory<DataContext> contextFactory) : ICou
         await using var context = _contextFactory.CreateDbContext();
         var courseEntity = await context.Courses.FirstOrDefaultAsync(c => c.Id == id);
         if (courseEntity == null)
-        { 
+        {
+            await context.DisposeAsync();
             return null!;
         }
         else
         {
-            return courseEntity == null ? null! : CourseFactory.CreateToModel(courseEntity);
+            var course = CourseFactory.CreateToModel(courseEntity);
+            await context.DisposeAsync();
+            return course;
         }
        
     }
@@ -57,18 +65,112 @@ public class CourseService(IDbContextFactory<DataContext> contextFactory) : ICou
     public async Task<Course> UpdateCourseAsync(CourseUpdateRequest request)
     {
         await using var context = _contextFactory.CreateDbContext();
-        var existingCourse = await context.Courses.FirstOrDefaultAsync(c => c.Id == request.Id);
+        var existingCourse = await context.Courses
+        .Include(c => c.Authors)
+        .Include(c => c.Prices)
+        .Include(c => c.Content)
+        .ThenInclude(content => content.ProgramDetails)
+        .FirstOrDefaultAsync(c => c.Id == request.Id);
         if (existingCourse == null)
-        {
             return null!;
+
+        existingCourse.Id = request.Id;
+        existingCourse.ImageUri = request.ImageUri;
+        existingCourse.ImageHeaderUri = request.ImageHeaderUri;
+        existingCourse.IsBestseller = request.IsBestseller;
+        existingCourse.IsDigital = request.IsDigital;
+        existingCourse.Categories = request.Categories;
+        existingCourse.Title = request.Title;
+        existingCourse.Ingress = request.Ingress;
+        existingCourse.StarRating = request.StarRating;
+        existingCourse.Reviews = request.Reviews;
+        existingCourse.Likes = request.Likes;
+        existingCourse.LikesInProcent = request.LikesInProcent;
+        existingCourse.Hours = request.Hours;
+
+        // Update Authors
+        if (existingCourse.Authors != null)
+        {
+            context.RemoveRange(existingCourse.Authors);
+            existingCourse.Authors.Clear();
         }
-        var updatedCourseEntity = CourseFactory.UpdateCourse(request);
-        updatedCourseEntity.Id = existingCourse.Id;
-        context.Entry(existingCourse).CurrentValues.SetValues(updatedCourseEntity);
+        if (request.Authors != null)
+        {
+            foreach (var author in request.Authors)
+            {
+                existingCourse.Authors.Add(new AuthorEntity { Name = author.Name, AuthorImage = author.AuthorImage });
+            }
+        }
+
+        // Update Prices
+        if (existingCourse.Prices == null)
+        {
+            existingCourse.Prices = new PricesEntity();
+        }
+        existingCourse.Prices.Currency = request.Prices.Currency;
+        existingCourse.Prices.Price = request.Prices.Price;
+        existingCourse.Prices.Discount = request.Prices.Discount;
+
+        // Update Content
+        if (existingCourse.Content == null)
+        {
+            existingCourse.Content = new ContentEntity();
+        }
+        existingCourse.Content.Description = request.Content.Description;
+        existingCourse.Content.Includes = request.Content.Includes;
+
+        // Update ProgramDetails
+        if (existingCourse.Content.ProgramDetails != null)
+        {
+            context.RemoveRange(existingCourse.Content.ProgramDetails);
+            existingCourse.Content.ProgramDetails.Clear();
+        }
+        if (request.Content.ProgramDetails != null)
+        {
+            foreach (var programDetail in request.Content.ProgramDetails)
+            {
+                existingCourse.Content.ProgramDetails.Add(new ProgramDetailEntity
+                {
+                    Id = programDetail.Id,
+                    Title = programDetail.Title,
+                    Description = programDetail.Description
+                });
+            }
+        }
+       
+        //context.Entry(existingCourse).CurrentValues.SetValues(updatedCourseEntity);
 
         await context.SaveChangesAsync();
-        return CourseFactory.CreateToModel(updatedCourseEntity);
+        await context.DisposeAsync();
+        return CourseFactory.CreateToModel(existingCourse);
     }
+
+    public async Task<UserCoursesEntity> CreateUserCourse(CreateUserCourse request)
+    {
+        await using var context = _contextFactory.CreateDbContext();
+
+        var userCourse = new UserCoursesEntity
+        {
+            CourseId = request.CourseId,
+            UserId = request.UserId
+        };
+        context.UserCourses.Add(userCourse);
+        await context.SaveChangesAsync();
+        return userCourse;
+
+    }
+
+    public async Task<IEnumerable<string>> GetUserCourseIds(string userId)
+    {
+        await using var context = _contextFactory.CreateDbContext();
+        var courseIds = await context.UserCourses
+            .Where(u => u.UserId == userId)
+            .Select(u => u.CourseId)
+            .ToListAsync();
+
+        return courseIds;
+    }
+
 }
 public interface ICourseService
 {
@@ -80,6 +182,8 @@ public interface ICourseService
 
     Task<IEnumerable<Course>> GetCoursesAsync();
     Task<Course> GetCourseByIdAsync(string id);
+    Task<UserCoursesEntity> CreateUserCourse(CreateUserCourse request);
+    Task<IEnumerable<string>> GetUserCourseIds(string userId);
 }
 
 

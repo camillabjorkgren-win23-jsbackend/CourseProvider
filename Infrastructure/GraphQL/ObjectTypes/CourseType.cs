@@ -1,4 +1,7 @@
-﻿using Infrastructure.Data.Entities;
+﻿using GraphQL.Types;
+using Infrastructure.Data.Entities;
+using Infrastructure.Models;
+using Infrastructure.Services;
 
 namespace Infrastructure.GraphQL.ObjectTypes;
 public class CourseType : ObjectType<CourseEntity>
@@ -62,4 +65,54 @@ public class ProgramDetailType : ObjectType<ProgramDetailEntity>
         descriptor.Field(p => p.Description).Type<StringType>();
     }
 }
+//public class UserCoursesType : ObjectType<UserCoursesEntity>
+//{
+//    protected override void Configure(IObjectTypeDescriptor<UserCoursesEntity> descriptor)
+//    {
+//        descriptor.Field(u => u.UserId).Type<StringType>();
+//        descriptor.Field(u => u.CourseId).Type<StringType>();
+//    }
+//}
+//public class UserCoursesQueryType : ObjectType<IEnumerable<string>>
+//{
+//    private readonly ICourseService _courseService;
+
+//    public UserCoursesQueryType(ICourseService courseService)
+//    {
+//        _courseService = courseService;
+//    }
+
+//    protected override void Configure(IObjectTypeDescriptor<IEnumerable<string>> descriptor)
+//    {
+//        descriptor.Name("UserCoursesQuery");
+//        descriptor.Description("A query to get all course IDs for a user.");
+//        descriptor.Field("courseIds")
+//            .Type<NonNullType<ListType<NonNullType<StringType>>>>()
+//            .Argument("userId", a => a.Type<NonNullType<StringType>>())
+//            .Resolve(async context =>
+//            {
+//                var userId = context.ArgumentValue<string>("userId");
+//                var courseIds = await _courseService.GetUserCourseIds(userId);
+//                return courseIds;
+//            });
+//    }
+
+public class UserCoursesInputType : ObjectType<UserCoursesEntity>
+{
+    protected override void Configure(IObjectTypeDescriptor<UserCoursesEntity> descriptor)
+    {
+        descriptor.Field(u => u.UserId).Type<StringType>();
+        descriptor.Field(u => u.CourseId).Type<StringType>();
+    }
+}
+
+public class UserCoursesResponseType : ObjectGraphType<UserCourses>
+{
+    public UserCoursesResponseType()
+    {
+        Field(x => x.UserId);
+        Field(x => x.CourseId);
+    }
+}
+
 

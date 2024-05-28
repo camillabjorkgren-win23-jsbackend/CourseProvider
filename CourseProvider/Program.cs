@@ -20,12 +20,13 @@ var host = new HostBuilder()
             x.UseCosmos(Environment.GetEnvironmentVariable("Cosmos_Uri")!, Environment.GetEnvironmentVariable("Cosmos_Db")!).UseLazyLoadingProxies();
         });
         services.AddScoped<ICourseService, CourseService>();
+        services.AddSingleton<UserCoursesInputType>();
+        services.AddSingleton<UserCoursesResponseType>();
 
         services.AddGraphQLFunction()
                     .AddQueryType<CourseQuery>()
                     .AddMutationType<CourseMutation>()
-                    .AddType<CourseType>();
-                    
+                    .AddType<CourseType>();                   
 
 
         var sp = services.BuildServiceProvider();

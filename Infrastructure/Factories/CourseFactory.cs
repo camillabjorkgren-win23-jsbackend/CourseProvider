@@ -8,6 +8,7 @@ public static class CourseFactory
     {
         return new CourseEntity
         {
+            Id = Guid.NewGuid().ToString(),
             ImageUri = request.ImageUri,
             ImageHeaderUri = request.ImageHeaderUri,
             IsBestseller = request.IsBestseller,
@@ -35,9 +36,9 @@ public static class CourseFactory
             {
                 Description = request.Content.Description,
                 Includes = request.Content.Includes,
-                ProgramDetails = request.Content.ProgramDetails?.Select(programDetail => new ProgramDetailEntity
+                ProgramDetails = request.Content.ProgramDetails?.Select((programDetail, index) => new ProgramDetailEntity
                 {
-                    Id = programDetail.Id,
+                    Id = index + 1, // Skapa ett unikt Id baserat på index
                     Title = programDetail.Title,
                     Description = programDetail.Description
                 }).ToList()
@@ -128,4 +129,5 @@ public static class CourseFactory
             }
         };
     }
+
 }

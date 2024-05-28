@@ -1,4 +1,5 @@
-﻿using Infrastructure.Models;
+﻿using Infrastructure.Data.Entities;
+using Infrastructure.Models;
 using Infrastructure.Services;
 
 namespace Infrastructure.GraphQL.Mutations;
@@ -22,5 +23,11 @@ public class CourseMutation(ICourseService courseService)
     public async Task<bool> DeleteCourseAsync(string id)
     {
         return await _courseService.DeleteCourseAsync(id);
+    }
+
+    [GraphQLName("saveUserCourse")]
+    public async Task<UserCoursesEntity> CreateUserCourse (CreateUserCourse input)
+    {
+        return await _courseService.CreateUserCourse(input);
     }
 }

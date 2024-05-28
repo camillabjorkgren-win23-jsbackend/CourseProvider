@@ -18,4 +18,11 @@ public class CourseQuery(ICourseService courseService)
     {
         return await _courseService.GetCourseByIdAsync(id);
     }
+
+    [GraphQLName("getUserCourseIds")]
+    public async Task<IEnumerable<string>> GetUserCourseIdsAsync(string userId)
+    {
+        var courseIds = await _courseService.GetUserCourseIds(userId);
+        return courseIds;
+    }
 }
