@@ -22,7 +22,6 @@ public class CourseQuery(ICourseService courseService)
     [GraphQLName("getUserCourseIds")]
     public async Task<IEnumerable<string>> GetUserCourseIdsAsync(string userId)
     {
-        var courseIds = await _courseService.GetUserCourseIds(userId);
-        return courseIds;
+        return await _courseService.GetUserCourseIds(userId);     
     }
 }

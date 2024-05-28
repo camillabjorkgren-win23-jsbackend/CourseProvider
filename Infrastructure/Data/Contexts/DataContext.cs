@@ -26,6 +26,5 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         modelBuilder.Entity<UserCoursesEntity>().ToContainer("UserCourses");
         modelBuilder.Entity<UserCoursesEntity>().HasPartitionKey(c => c.UserId);
-        modelBuilder.Entity<UserCoursesEntity>().HasNoKey();
     }
 }

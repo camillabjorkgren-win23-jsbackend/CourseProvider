@@ -147,28 +147,85 @@ public class CourseService(IDbContextFactory<DataContext> contextFactory) : ICou
 
     public async Task<UserCoursesEntity> CreateUserCourse(CreateUserCourse request)
     {
-        await using var context = _contextFactory.CreateDbContext();
-
-        var userCourse = new UserCoursesEntity
+       try
         {
-            CourseId = request.CourseId,
-            UserId = request.UserId
-        };
-        context.UserCourses.Add(userCourse);
-        await context.SaveChangesAsync();
-        return userCourse;
+            await using var context = _contextFactory.CreateDbContext();
 
+            var userCourse = new UserCoursesEntity
+            {
+                CourseId = request.CourseId,
+                UserId = request.UserId
+            };
+            context.UserCourses.Add(userCourse);
+            await context.SaveChangesAsync();
+            return userCourse;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+
+    }
+
+    public async Task<bool> DeleteUserCourse(UserCourses userCourse)
+    {
+        try
+        {
+            await using var context = _contextFactory.CreateDbContext();
+            var existingUserCourse = await context.UserCourses.FirstOrDefaultAsync(u => u.UserId == userCourse.UserId && u.CourseId == userCourse.CourseId);
+            if (existingUserCourse == null) return false;
+
+            context.UserCourses.Remove(existingUserCourse);
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public async Task<bool> DeleteAllUserCourses(string userId)
+    {
+        try
+        {
+            await using var context = _contextFactory.CreateDbContext();
+            var userCourses = await context.UserCourses.Where(u => u.UserId == userId).ToListAsync();
+            if (userCourses.Count == 0) 
+                return false;
+            foreach (var userCourse in userCourses)
+            {
+                context.UserCourses.Remove(userCourse);
+            };
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<IEnumerable<string>> GetUserCourseIds(string userId)
     {
-        await using var context = _contextFactory.CreateDbContext();
-        var courseIds = await context.UserCourses
-            .Where(u => u.UserId == userId)
-            .Select(u => u.CourseId)
-            .ToListAsync();
+        try
+        {
+            await using var context = _contextFactory.CreateDbContext();
+            var courseIds = await context.UserCourses
+                .Where(u => u.UserId == userId)
+                .Select(u => u.CourseId)
+                .ToListAsync();
 
-        return courseIds;
+            return courseIds;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
 }
@@ -184,6 +241,8 @@ public interface ICourseService
     Task<Course> GetCourseByIdAsync(string id);
     Task<UserCoursesEntity> CreateUserCourse(CreateUserCourse request);
     Task<IEnumerable<string>> GetUserCourseIds(string userId);
+    Task<bool> DeleteUserCourse(UserCourses userCourse);
+    Task<bool> DeleteAllUserCourses(string userId);
 }
 
 

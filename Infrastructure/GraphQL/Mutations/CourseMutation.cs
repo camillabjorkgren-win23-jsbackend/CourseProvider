@@ -30,4 +30,16 @@ public class CourseMutation(ICourseService courseService)
     {
         return await _courseService.CreateUserCourse(input);
     }
+
+    [GraphQLName("deleteUserCourse")]
+    public async Task<bool> DeleteUserCourse (UserCourses userCourse)
+    {
+        return await _courseService.DeleteUserCourse(userCourse);
+    }
+
+    [GraphQLName("deleteAllUserCourses")]
+    public async Task<bool> DeleteAllUserCourses(string userId)
+    {
+        return await _courseService.DeleteAllUserCourses(userId);
+    }
 }
