@@ -14,6 +14,8 @@ public class Course
     public decimal StarRating { get; set; }
     public string? Reviews { get; set; }
     public string? Likes { get; set; }
+    
+    public bool? IsBookmarked { get; set; }
     public string? LikesInProcent { get; set; }
     public string? Hours { get; set; }
     public virtual List<Author>? Authors { get; set; }

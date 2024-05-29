@@ -157,6 +157,11 @@ public class CourseService(IDbContextFactory<DataContext> contextFactory) : ICou
                 UserId = request.UserId
             };
             context.UserCourses.Add(userCourse);
+            var courseEntity = await context.Courses.FirstOrDefaultAsync(c => c.Id == userCourse.CourseId);
+            if (courseEntity == null)
+            {
+                courseEntity.IsBookmarked = true;
+            }
             await context.SaveChangesAsync();
             return userCourse;
         }

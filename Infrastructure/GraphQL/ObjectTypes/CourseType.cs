@@ -11,6 +11,7 @@ public class CourseType : ObjectType<CourseEntity>
         descriptor.Field(c => c.Id).Type<NonNullType<IdType>>();
         descriptor.Field(c => c.IsBestseller).Type<BooleanType>();
         descriptor.Field(c => c.IsDigital).Type<BooleanType>();
+        descriptor.Field(c => c.IsBookmarked).Type<BooleanType>();
         descriptor.Field(c => c.Categories).Type<ListType<StringType>>();
         descriptor.Field(c => c.Title).Type<StringType>();
         descriptor.Field(c => c.Ingress).Type<StringType>();

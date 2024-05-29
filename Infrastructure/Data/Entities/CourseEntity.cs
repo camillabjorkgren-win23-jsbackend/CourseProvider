@@ -17,6 +17,7 @@ public class CourseEntity
     public string? Likes { get; set; }
     public string? LikesInProcent { get; set; }
     public string? Hours { get; set; }
+    public bool? IsBookmarked { get; set; }
     public virtual List<AuthorEntity>? Authors { get; set; }
     public virtual PricesEntity? Prices { get; set; }
     public virtual ContentEntity? Content { get; set; }

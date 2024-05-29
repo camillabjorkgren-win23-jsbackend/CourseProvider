@@ -102,6 +102,7 @@ public static class CourseFactory
             Ingress = entity.Ingress,
             StarRating = entity.StarRating,
             Reviews = entity.Reviews,
+            IsBookmarked = entity.IsBookmarked ?? null,
             Likes = entity.Likes,
             LikesInProcent = entity.LikesInProcent,
             Hours = entity.Hours,

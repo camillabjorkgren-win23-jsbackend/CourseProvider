@@ -13,7 +13,14 @@ public class GraphQL(ILogger<GraphQL> logger, IGraphQLRequestExecutor graphQLReq
     [Function("GraphQL")]
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route ="graphql")] HttpRequest req)
     {
-        //Get from GraphQL query
-      return await _graphQLRequestExecutor.ExecuteAsync(req);
+        try
+        {
+            return await _graphQLRequestExecutor.ExecuteAsync(req);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error executing GraphQL request");
+            return new BadRequestObjectResult(ex.Message);
+        }
     }
 }
