@@ -14,6 +14,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         {
             optionsBuilder.UseLazyLoadingProxies();
         }
+
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
