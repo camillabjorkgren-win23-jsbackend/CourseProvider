@@ -1,5 +1,5 @@
 # CourseProvider
-A web application developed using ASP.NET Core MVC, designed to manage courses and user enrollments. This application allows users to browse available courses, enroll in courses, and manage their course schedules. Administrators have additional capabilities to create, update, and delete courses.
+Designed to manage courses and user enrollments. This azure function allows users to browse available courses, enroll in courses, and manage their course schedules. Administrators have additional capabilities to create, update, and delete courses.
 
 ## Features
 - Course Management
